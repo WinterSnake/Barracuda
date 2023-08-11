@@ -27,12 +27,14 @@ class AuthenticationScreen(Screen):
         if not self._connect():
             print("error connecting...")
             return
+        self.manager.current = "account_list_screen"
 
     def on_register(self) -> None:
         print("Register")
         if not self._connect():
             print("error connecting...")
             return
+        self.manager.current = "account_list_screen"
 
     # -Instance Methods: Private
     def _connect(self) -> bool:
@@ -42,6 +44,7 @@ class AuthenticationScreen(Screen):
             self._socket.connect(self.address)
         except ConnectionRefusedError:
             return False
+        self._socket.close()
         return True
 
     # -Properties
