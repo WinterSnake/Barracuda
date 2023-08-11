@@ -1,0 +1,11 @@
+# Python: Cache
+__pycache__/
+
+# Python: Libraries
+.libs/
+
+# Rust: Build
+target/
+
+# Session: tmux
+.tmux-session
