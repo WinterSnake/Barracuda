@@ -16,9 +16,9 @@ class BarracudaApp(App):
     """Barracuda client implementation using Kivy GUI framework"""
 
     # -Instance Methods
-    def build(self) -> Widget:
+    def build(self) -> None:
         self.title = "Barracuda"
-        return Widget()
+        return None
 
 
 ## Body

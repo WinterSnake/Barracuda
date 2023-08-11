@@ -1,0 +1,36 @@
+#:kivy 1.0.9
+
+AnchorLayout:
+	anchor_x: 'center'
+	anchor_y: 'center'
+	BoxLayout:
+		orientation: 'vertical'
+		BoxLayout:
+			orientation: 'horizontal'
+			Label:
+				text: "Username"
+			TextInput:
+				id: username
+				multiline: False
+		BoxLayout:
+			orientation: 'horizontal'
+			Label:
+				text: "Password"
+			TextInput:
+				id: password
+				password: True
+				multiline: False
+		BoxLayout:
+			orientation: 'horizontal'
+			Label:
+				text: "Address"
+			TextInput:
+				id: ip
+				text: "ip"
+				multiline: False
+			TextInput:
+				id: port
+				text: "port"
+				multiline: False
+		Button:
+			text: "Login"
