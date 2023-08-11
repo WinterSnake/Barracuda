@@ -1,36 +1,24 @@
-#:kivy 1.0.9
+#: kivy 2.2.1
+#: include components/screens/about.kv
+#: include components/screens/account/create.kv
+#: include components/screens/account/detail.kv
+#: include components/screens/account/list.kv
+#: include components/screens/authentication.kv
 
-AnchorLayout:
-	anchor_x: 'center'
-	anchor_y: 'center'
-	BoxLayout:
-		orientation: 'vertical'
-		BoxLayout:
-			orientation: 'horizontal'
-			Label:
-				text: "Username"
-			TextInput:
-				id: username
-				multiline: False
-		BoxLayout:
-			orientation: 'horizontal'
-			Label:
-				text: "Password"
-			TextInput:
-				id: password
-				password: True
-				multiline: False
-		BoxLayout:
-			orientation: 'horizontal'
-			Label:
-				text: "Address"
-			TextInput:
-				id: ip
-				text: "ip"
-				multiline: False
-			TextInput:
-				id: port
-				text: "port"
-				multiline: False
-		Button:
-			text: "Login"
+ScreenManager:
+	id: manager
+	AuthenticationScreen:
+		id: authentication
+		name: "authentication_screen"
+	AboutScreen:
+		id: about
+		name: "about_screen"
+	CreateScreen:
+		id: account_create
+		name: "account_create_screen"
+	DetailScreen:
+		id: account_detail
+		name: "account_detail_screen"
+	ListScreen:
+		id: account_list
+		name: "account_list_screen"

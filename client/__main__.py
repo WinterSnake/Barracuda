@@ -8,7 +8,12 @@
 import asyncio
 
 from kivy.app import App
-from kivy.uix.widget import Widget
+
+from .components.screens import (
+    AboutScreen,
+    AccountCreateScreen, AccountDetailScreen, AccountListScreen,
+    AuthenticationScreen
+)
 
 
 ## Classes
@@ -22,6 +27,4 @@ class BarracudaApp(App):
 
 
 ## Body
-asyncio.run(
-    BarracudaApp().async_run()
-)
+asyncio.run(BarracudaApp().async_run())
