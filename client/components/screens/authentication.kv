@@ -5,18 +5,28 @@
 		cols: 2
 		rows: 3
 		TextInput:
+			id: username
 			hint_text: "Username"
 			multiline: False
 		TextInput:
+			id: password
 			hint_text: "Password"
+			password: True
 			multiline: False
 		TextInput:
+			id: ip
+			text: "localhost"
 			hint_text: "IP"
 			multiline: False
 		TextInput:
+			id: port
+			text: "11123"
 			hint_text: "Port"
 			multiline: False
+			input_filter: 'int'
 		Button:
+			on_release: root.on_login()
 			text: "Login"
 		Button:
+			on_release: root.on_register()
 			text: "Register"
