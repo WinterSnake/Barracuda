@@ -5,14 +5,19 @@
 */
 
 use std::io;
-use std::io::{Read, Write};
+//use std::io::{Read, Write};
 use std::net::{TcpStream};
-use barracuda::protocol;
+use rsa::{RsaPrivateKey};
+use barracuda::{Session};
+//use barracuda::{protocol, Session};
 
 fn main()
 {
-    if let Ok(mut client) = TcpStream::connect("127.0.0.1:11234")
+    if let Ok(stream) = TcpStream::connect("127.0.0.1:11234")
     {
+        let mut rng = rand::thread_rng();
+        let private_key = RsaPrivateKey::new(&mut rng, 2048).expect("failed to generate key");
+        let _session = Session::new(stream, private_key);
         let stdin = io::stdin();
         loop
         {
