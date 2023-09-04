@@ -9,6 +9,8 @@ use rsa::{RsaPrivateKey, RsaPublicKey};
 
 pub mod protocol;
 
+use protocol::message::{Message};
+
 pub struct Session
 {
     stream: TcpStream,
@@ -19,6 +21,7 @@ pub struct Session
 
 impl Session
 {
+    // Constructors
     pub fn new(stream: TcpStream, private_key: RsaPrivateKey) -> Session
     {
         let public_key = RsaPublicKey::from(&private_key);
@@ -26,7 +29,17 @@ impl Session
             stream: stream,
             private_key: private_key,
             public_key: public_key,
-            connection_key: None
+            connection_key: None,
         }
+    }
+    // Methods
+    pub fn send(&mut self, _message: Message)
+    {
+
+    }
+
+    pub fn recv(&self) -> Message
+    {
+        Message::SendKey(&self.public_key)
     }
 }
