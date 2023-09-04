@@ -4,6 +4,7 @@
     Written By: Ryan Smith
 */
 
+use std::env;
 use std::net::{TcpListener, TcpStream};
 use rsa::{RsaPrivateKey};
 use barracuda::{Session};
@@ -12,9 +13,13 @@ const KEYSIZE: usize = 2048;
 
 fn main() -> std::io::Result<()>
 {
+
+    let args: Vec<String> = env::args().collect();
+    let address = String::from(&args[1]);
+
     let mut rng = rand::thread_rng();
     let private_key = RsaPrivateKey::new(&mut rng, KEYSIZE).expect("failed to generate key");
-    let server = TcpListener::bind("127.0.0.1:39361")?;
+    let server = TcpListener::bind(address)?;
     println!("Server running at: '{:?}'", server.local_addr()?);
     for stream in server.incoming()
     {
