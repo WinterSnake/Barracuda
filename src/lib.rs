@@ -16,7 +16,7 @@ pub struct Session
     stream: TcpStream,
     private_key: RsaPrivateKey,
     public_key: RsaPublicKey,
-    connection_key: Option<RsaPublicKey>,
+    client_key: Option<RsaPublicKey>,
 }
 
 impl Session
@@ -29,7 +29,7 @@ impl Session
             stream: stream,
             private_key: private_key,
             public_key: public_key,
-            connection_key: None,
+            client_key: None,
         }
     }
     // Methods
@@ -40,6 +40,6 @@ impl Session
 
     pub fn recv(&self) -> Message
     {
-        Message::SendKey(&self.public_key)
+        Message::None
     }
 }

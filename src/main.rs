@@ -13,10 +13,8 @@ const KEYSIZE: usize = 2048;
 
 fn main() -> std::io::Result<()>
 {
-
     let args: Vec<String> = env::args().collect();
-    let address = String::from(&args[1]);
-
+    let address = &args[1];
     let mut rng = rand::thread_rng();
     let private_key = RsaPrivateKey::new(&mut rng, KEYSIZE).expect("failed to generate key");
     let server = TcpListener::bind(address)?;

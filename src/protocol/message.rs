@@ -7,12 +7,18 @@
 
 use rsa::{RsaPublicKey};
 
-pub enum Message<'a>
+const MessageExchangeKeyHeader: usize = 0x0001;
+
+pub enum Message
 {
     None,
-    SendKey(&'a RsaPublicKey)
+    ExchangeKey(RsaPublicKey)
 }
 
-impl Message<'_>
+impl Message
 {
+    fn from_bytes() -> Message
+    {
+        Message::None
+    }
 }
