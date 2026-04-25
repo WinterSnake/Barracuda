@@ -1,0 +1,7 @@
+[project]
+name = "barracuda-client"
+version = "1.0.0"
+description = "A client interface for the Barracuda password manager"
+
+[tool.mypy]
+strict = true
