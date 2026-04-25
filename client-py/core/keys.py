@@ -46,16 +46,16 @@ class MasterKey:
     # -Instance Methods
     def encrypt_vault_key(self, vk: VaultKey) -> bytes:
         '''Encrypt VaultKey using recovery and return tagged cipher blob'''
-        return encrypt(self._key, vk._key)
+        return encrypt(self._key_b, vk._key)
 
     def decrypt_vault_key(self, blob: bytes) -> VaultKey:
         '''Decrypt tagged cipher blob using recovery and return reconstructed VaultKey'''
-        return VaultKey(decrypt(self._key, blob))
+        return VaultKey(decrypt(self._key_b, blob))
 
     def generate_hash(self, username: str, salt: bytes) -> bytes:
         '''Generate a hash for client-server authentication using key A'''
         return hmac.digest(
-            self._key,
+            self._key_a,
             username.encode('utf-8') + salt,
             'sha256'
         )
@@ -78,11 +78,11 @@ class MasterKey:
     _key: bytes
 
     @property
-    def key_a(self) -> bytes:
+    def _key_a(self) -> bytes:
         return self._key[:32]
 
     @property
-    def key_b(self) -> bytes:
+    def _key_b(self) -> bytes:
         return self._key[32:]
 
 
