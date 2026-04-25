@@ -1,0 +1,7 @@
+syntax = "proto3";
+package authorization;
+
+message SessionResponse {
+  string token = 1;
+  bytes vault_key = 2;
+}

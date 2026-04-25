@@ -4,3 +4,9 @@
 ##-------------------------------##
 ## Core                          ##
 ##-------------------------------##
+
+## Imports
+from .client import BarracudaClient
+
+## Constants
+__all__ = ("BarracudaClient",)
