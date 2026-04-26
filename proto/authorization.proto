@@ -5,3 +5,9 @@ message SessionResponse {
   string token = 1;
   bytes vault_key = 2;
 }
+
+message RekeyRequest {
+  bytes old_hash = 1;
+  bytes new_hash = 2;
+  bytes new_blob = 3;
+}

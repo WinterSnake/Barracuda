@@ -25,9 +25,33 @@ class BarracudaClient:
     """
 
     # -Constructor
-    def __init__(self, session: aiohttp.ClientSession, vk: VaultKey) -> None:
+    def __init__(
+        self, session: aiohttp.ClientSession,
+        username: str, vk: VaultKey
+    ) -> None:
         self._session: aiohttp.ClientSession = session
+        self.username: str = username
         self._vk: VaultKey = vk
+
+    # -Instance Methods
+    async def update_password(self, old_password: str, new_password: str) -> None:
+        # -Crypto
+        async with self._session.get(f'/account/salt') as resp:
+            assert resp.ok # -TODO: Error handling
+            salt: bytes = await resp.read()
+        mk = MasterKey.derive_from(old_password, salt)
+        old_hash = mk.generate_hash(self.username, salt)
+        mk = MasterKey.derive_from(new_password, salt)
+        new_hash = mk.generate_hash(self.username, salt)
+        new_blob = mk.encrypt_vault_key(self._vk)
+        # -Http
+        proto = authorization_pb2.RekeyRequest()
+        proto.old_hash = old_hash
+        proto.new_hash = new_hash
+        proto.new_blob = new_blob
+        data = proto.SerializeToString()
+        async with self._session.patch('/account/key', data=data) as resp:
+            assert resp.ok # -TODO: Error handling
 
     # -Class Methods
     @classmethod
@@ -51,7 +75,7 @@ class BarracudaClient:
             proto_login.ParseFromString(await resp.read())
         vk = mk.decrypt_vault_key(proto_login.vault_key)
         session.headers['Authorization'] = f"Bearer {proto_login.token}"
-        return cls(session, vk)
+        return cls(session, username, vk)
 
     @classmethod
     async def recover(
@@ -85,7 +109,7 @@ class BarracudaClient:
         form.add_field('mk_blob', mk_blob, filename="mk_blob", content_type='application/octet-stream')
         async with session.patch('/recovery/upgrade', data=form) as resp:
             assert resp.ok # -TODO: Error handling
-        return cls(session, vk)
+        return cls(session, username, vk)
 
     # -Static Methods
     @staticmethod
