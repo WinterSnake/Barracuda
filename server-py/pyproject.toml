@@ -2,6 +2,16 @@
 name = "barracuda-server"
 version = "1.0.0"
 description = "A server interface for the Barracuda password manager"
+dependencies = [
+	"flask",
+	"protobuf"
+]
+
+[project.optional-dependencies]
+dev = [
+	"mypy-protobuf",
+	"types-protobuf"
+]
 
 [tool.mypy]
 strict = true

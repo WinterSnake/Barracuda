@@ -1,4 +1,0 @@
-aiohttp
-argon2-cffi
-cryptography
-protobuf

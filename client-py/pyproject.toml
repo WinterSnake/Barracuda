@@ -2,6 +2,22 @@
 name = "barracuda-client"
 version = "1.0.0"
 description = "A client interface for the Barracuda password manager"
+dependencies = [
+	"aiohttp",
+	"argon2-cffi",
+	"cryptography",
+	"protobuf"
+]
+
+[project.optional-dependencies]
+dev = [
+	"mypy-protobuf",
+	"types-protobuf"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["barracuda"]
 
 [tool.mypy]
 strict = true
