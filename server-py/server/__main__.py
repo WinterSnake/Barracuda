@@ -25,7 +25,7 @@ sessions = SessionManager(timedelta(minutes=20))
 ## Functions
 @app.route('/register', methods=['POST'])
 def user_register() -> tuple[str, int]:
-    username = request.form['username']
+    username = request.form['username'].lower()
     register = UserSchema(
         username,
         request.files['salt'].read(),
@@ -42,6 +42,7 @@ def user_register() -> tuple[str, int]:
 
 @app.get('/salt/<string:username>')
 def user_salt(username: str) -> Response:
+    username = username.lower()
     with DBContext.new() as db:
         salt: bytes
         user = db.read_user(username)
@@ -58,7 +59,7 @@ def user_salt(username: str) -> Response:
 
 @app.route('/login', methods=['POST'])
 def user_login() -> Response:
-    username = request.form['username']
+    username = request.form['username'].lower()
     mk_hash = request.files['mk_hash'].read()
     with DBContext.new() as db:
         user = db.read_user(username)
@@ -75,7 +76,7 @@ def user_login() -> Response:
 
 @app.route('/recovery', methods=['POST'])
 def user_recovery() -> Response:
-    username = request.form['username']
+    username = request.form['username'].lower()
     rk_hash = request.files['rk_hash'].read()
     with DBContext.new() as db:
         user = db.read_user(username)

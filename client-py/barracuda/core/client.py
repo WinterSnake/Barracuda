@@ -59,6 +59,7 @@ class BarracudaClient:
         cls, session: aiohttp.ClientSession, username: str, password: str
     ) -> Self:
         '''Derive master key from password and unwrap vault key via server auth'''
+        username = username.lower()
         # -Crypto
         async with session.get(f'/salt/{username}') as resp:
             assert resp.ok # -TODO: Error handling
@@ -83,6 +84,7 @@ class BarracudaClient:
         recovery_hex_str: str, new_password: str
     ) -> Self:
         '''Bypass master password using recovery key to re-wrap vault under new password'''
+        username = username.lower()
         # -Crypto: Recovery
         async with session.get(f'/salt/{username}') as resp:
             assert resp.ok # -TODO: Error handling
@@ -117,6 +119,7 @@ class BarracudaClient:
         session: aiohttp.ClientSession, username: str, password: str
     ) -> str:
         '''Requests new vault account initialization and returns recovery key'''
+        username = username.lower()
         # -Crypto
         salt = os.urandom(16)
         vk = VaultKey.new()
