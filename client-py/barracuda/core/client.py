@@ -34,11 +34,39 @@ class BarracudaClient:
         self._vk: VaultKey = vk
 
     # -Instance Methods
+    async def delete(self, password: str) -> None:
+        # -Crypto
+        salt = await self._get_salt()
+        mk = MasterKey.derive_from(password, salt)
+        mk_hash = mk.generate_hash(self.username, salt)
+        async with self._session.delete('/user', data=mk_hash) as resp:
+            assert resp.ok
+
+    async def logout(self) -> None:
+        async with self._session.delete('/session') as resp:
+            assert resp.ok
+
+    async def renew_recovery_key(self, password: str) -> str:
+        # -Crypto
+        salt = await self._get_salt()
+        mk = MasterKey.derive_from(password, salt)
+        mk_hash = mk.generate_hash(self.username, salt)
+        rk = RecoveryKey.new()
+        rk_hash = rk.generate_hash(self.username, salt)
+        rk_blob = rk.encrypt_vault_key(self._vk)
+        # -Http
+        proto = authorization_pb2.RekeyRequest()
+        proto.old_hash = mk_hash
+        proto.new_hash = rk_hash
+        proto.new_blob = rk_blob
+        data = proto.SerializeToString()
+        async with self._session.patch('/user/recovery', data=data) as resp:
+            assert resp.ok # -TODO: Error handling
+        return rk.hex_str
+
     async def update_password(self, old_password: str, new_password: str) -> None:
         # -Crypto
-        async with self._session.get(f'/account/salt') as resp:
-            assert resp.ok # -TODO: Error handling
-            salt: bytes = await resp.read()
+        salt = await self._get_salt()
         mk = MasterKey.derive_from(old_password, salt)
         old_hash = mk.generate_hash(self.username, salt)
         mk = MasterKey.derive_from(new_password, salt)
@@ -50,8 +78,13 @@ class BarracudaClient:
         proto.new_hash = new_hash
         proto.new_blob = new_blob
         data = proto.SerializeToString()
-        async with self._session.patch('/account/key', data=data) as resp:
+        async with self._session.patch('/user/auth', data=data) as resp:
             assert resp.ok # -TODO: Error handling
+
+    async def _get_salt(self) -> bytes:
+        async with self._session.get(f'/user/salt') as resp:
+            assert resp.ok # -TODO: Error handling
+            return await resp.read()
 
     # -Class Methods
     @classmethod
@@ -61,7 +94,7 @@ class BarracudaClient:
         '''Derive master key from password and unwrap vault key via server auth'''
         username = username.lower()
         # -Crypto
-        async with session.get(f'/salt/{username}') as resp:
+        async with session.get(f'/user/{username}/salt') as resp:
             assert resp.ok # -TODO: Error handling
             salt: bytes = await resp.read()
         mk = MasterKey.derive_from(password, salt)
@@ -70,7 +103,7 @@ class BarracudaClient:
         form = aiohttp.FormData()
         form.add_field('username', username)
         form.add_field('mk_hash', mk_hash, filename="mk_hash", content_type='application/octet-stream')
-        async with session.post('/login', data=form) as resp:
+        async with session.post('/session/auth', data=form) as resp:
             assert resp.ok # -TODO: Error handling
             proto_login = authorization_pb2.SessionResponse()
             proto_login.ParseFromString(await resp.read())
@@ -86,7 +119,7 @@ class BarracudaClient:
         '''Bypass master password using recovery key to re-wrap vault under new password'''
         username = username.lower()
         # -Crypto: Recovery
-        async with session.get(f'/salt/{username}') as resp:
+        async with session.get(f'/user/{username}/salt') as resp:
             assert resp.ok # -TODO: Error handling
             salt: bytes = await resp.read()
         rk = RecoveryKey(bytes.fromhex(recovery_hex_str))
@@ -95,7 +128,7 @@ class BarracudaClient:
         form = aiohttp.FormData()
         form.add_field('username', username)
         form.add_field('rk_hash', rk_hash, filename="rk_hash", content_type='application/octet-stream')
-        async with session.post('/recovery', data=form) as resp:
+        async with session.post('/session/recovery', data=form) as resp:
             assert resp.ok # -TODO: Error handling
             proto_recovery = authorization_pb2.SessionResponse()
             proto_recovery.ParseFromString(await resp.read())
@@ -109,7 +142,7 @@ class BarracudaClient:
         form = aiohttp.FormData()
         form.add_field('mk_hash', mk_hash, filename="mk_hash", content_type='application/octet-stream')
         form.add_field('mk_blob', mk_blob, filename="mk_blob", content_type='application/octet-stream')
-        async with session.patch('/recovery/upgrade', data=form) as resp:
+        async with session.post('/session/upgrade', data=form) as resp:
             assert resp.ok # -TODO: Error handling
         return cls(session, username, vk)
 
@@ -137,6 +170,6 @@ class BarracudaClient:
         form.add_field('mk_blob', mk_blob, filename="mk_blob", content_type='application/octet-stream')
         form.add_field('rk_hash', rk_hash, filename="rk_hash", content_type='application/octet-stream')
         form.add_field('rk_blob', rk_blob, filename="rk_blob", content_type='application/octet-stream')
-        async with session.post('/register', data=form) as resp:
+        async with session.post('/user', data=form) as resp:
             assert resp.ok # -TODO: Error handling
         return rk.hex_str
