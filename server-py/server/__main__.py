@@ -38,7 +38,7 @@ def session_create_auth() -> Response:
     mk_hash = request.files['mk_hash'].read()
     with DBContext.new() as db:
         user = db.user_find(username)
-        if not is_valid_user(mk_hash, user):
+        if not is_valid_user_hash(mk_hash, user):
             return make_response('', 401)
         assert user is not None
         session = sessions.create_session(user.id)
@@ -55,7 +55,7 @@ def session_create_recovery() -> Response:
     rk_hash = request.files['rk_hash'].read()
     with DBContext.new() as db:
         user = db.user_find(username)
-        if not is_valid_user(rk_hash, user, is_recovery=True):
+        if not is_valid_user_hash(rk_hash, user, is_recovery=True):
             return make_response('', 401)
         assert user is not None
         session = sessions.create_session(user.id, is_recovery=True)
@@ -105,9 +105,10 @@ def user_delete(session: Session) -> Response:
     mk_hash = request.get_data()
     with DBContext.new() as db:
         user = db.user_get(session.user_id)
-        if not is_valid_user(mk_hash, user):
+        if not is_valid_user_hash(mk_hash, user):
             return make_response('', 403)
         db.user_delete(user.id)
+        sessions.delete_session(session)
         return make_response('', 204)
 
 
@@ -118,7 +119,7 @@ def user_patch_mk(session: Session) -> Response:
     proto.ParseFromString(request.get_data())
     with DBContext.new() as db:
         user = db.user_get(session.user_id)
-        if not is_valid_user(proto.old_hash, user):
+        if not is_valid_user_hash(proto.old_hash, user):
             return make_response('', 403)
         user = user.with_new_mk(proto.new_hash, proto.new_blob)
         db.user_update(user)
@@ -132,7 +133,7 @@ def user_patch_rk(session: Session) -> Response:
     proto.ParseFromString(request.get_data())
     with DBContext.new() as db:
         user = db.user_get(session.user_id)
-        if not is_valid_user(proto.old_hash, user):
+        if not is_valid_user_hash(proto.old_hash, user):
             return make_response('', 403)
         user = user.with_new_rk(proto.new_hash, proto.new_blob)
         db.user_update(user)
@@ -166,7 +167,7 @@ def user_get_salt_named(username: str) -> Response:
 
 ## Functions: [Endpoints]Vault
 ## Functions: Helpers
-def is_valid_user(
+def is_valid_user_hash(
     _hash: bytes, user: User | None, is_recovery: bool = False
 ) -> bool:
     if user is None:
