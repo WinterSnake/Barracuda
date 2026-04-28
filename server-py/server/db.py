@@ -35,7 +35,8 @@ def initialize_database(db: str) -> None:
             rk_hash BLOB NOT NULL,
             rk_blob BLOB NOT NULL
         );""")
-    DB = db
+        # -Table: Vault
+        DB = db
 
 
 ## Classes
@@ -58,14 +59,20 @@ class DBContext:
         self._connection.close()
 
     # -Instance Methods
-    def get_user(self, _id: int) -> User:
+    def user_delete(self, _id: int) -> None:
+        self._connection.execute(
+            "DELETE FROM Users WHERE id = ?;",
+            (_id,)
+        )
+
+    def user_get(self, _id: int) -> User:
         user = self._connection.execute(
             "SELECT * FROM Users WHERE id = ?;",
             (_id,)
         ).fetchone()
         return User(**user)
 
-    def read_user(self, username: str) -> User | None:
+    def user_find(self, username: str) -> User | None:
         user = self._connection.execute(
             "SELECT * FROM Users WHERE username = ?;",
             (username,)
@@ -74,13 +81,13 @@ class DBContext:
             return None
         return User(**user)
 
-    def update_user(self, user: User) -> None:
+    def user_update(self, user: User) -> None:
         self._connection.execute(
             "UPDATE Users SET mk_hash = ?, mk_blob = ?, rk_hash = ?, rk_blob = ? WHERE id = ?;",
             (user.mk_hash, user.mk_blob, user.rk_hash, user.rk_blob, user.id)
         )
 
-    def write_user(self, user: UserSchema) -> bool:
+    def user_write(self, user: UserSchema) -> bool:
         try:
             self._connection.execute(
                 "INSERT INTO Users (username, salt, mk_hash, mk_blob, rk_hash, rk_blob) VALUES (?, ?, ?, ?, ?, ?);",

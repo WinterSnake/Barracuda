@@ -20,6 +20,9 @@ class User:
     def with_new_mk(self, _hash: bytes, blob: bytes) -> Self:
         return replace(self, mk_hash=_hash, mk_blob=blob)
 
+    def with_new_rk(self, _hash: bytes, blob: bytes) -> Self:
+        return replace(self, rk_hash=_hash, rk_blob=blob)
+
     # -Properties
     id: int
     username: str
