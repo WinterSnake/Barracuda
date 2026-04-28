@@ -99,6 +99,7 @@ async def _main(url: str) -> None:
                     password = getpass("Password: ")
                     try:
                         await client.delete(password)
+                        client = None
                         print("Account deleted")
                     except:
                         print("Failed to delete account")
